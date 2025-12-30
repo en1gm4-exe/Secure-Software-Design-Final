@@ -9,7 +9,7 @@ pipeline {
     environment {
         REPO_URL = 'https://github.com/en1gm4-exe/Secure-Software-Design-Final.git'
         APP_DIR = 'Lab06'
-        DEPLOY_DIR = "${WORKSPACE}/deploy"
+        DEPLOY_DIR = 'deploy'
         VERSION = '1.0.0'
     }
     
@@ -94,6 +94,8 @@ EOF
                         cp -r static build/ 2>/dev/null || true
                         cp requirements.txt build/ 2>/dev/null || true
                         tar -czf flask-app-build.tar.gz build/
+                        echo "Build created:"
+                        ls -la flask-app-build.tar.gz
                     '''
                     archiveArtifacts artifacts: 'flask-app-build.tar.gz', fingerprint: true
                 }
@@ -106,14 +108,25 @@ EOF
                     echo "Deploying to environment: ${params.DEPLOYMENT_ENV}"
                     dir('source/' + env.APP_DIR) {
                         sh '''
+                            echo "Current directory: $(pwd)"
+                            echo "Files in current directory:"
+                            ls -la
+                            
                             echo "Simulating deployment to ${DEPLOY_DIR}"
                             rm -rf ${DEPLOY_DIR}
                             mkdir -p ${DEPLOY_DIR}
-                            tar -xzf flask-app-build.tar.gz -C /tmp/
-                            cp -r /tmp/build/* ${DEPLOY_DIR}/ || echo "Copy simulation"
-                            echo "Deployment Time: $(date)" > ${DEPLOY_DIR}/deployment.log
+                            
+                            echo "Extracting build files..."
+                            tar -xzf flask-app-build.tar.gz -C ${DEPLOY_DIR}
+                            
+                            echo "Copying files..."
+                            cp -r ${DEPLOY_DIR}/build/* ${DEPLOY_DIR}/ || echo "Copy simulation"
+                            
+                            echo "Creating deployment log..."
+                            date > ${DEPLOY_DIR}/deployment.log
                             echo "Build Number: ${BUILD_NUMBER}" >> ${DEPLOY_DIR}/deployment.log
                             echo "Deployment environment: ${params.DEPLOYMENT_ENV}" >> ${DEPLOY_DIR}/deployment.log
+                            
                             echo "Deployed files:"
                             ls -la ${DEPLOY_DIR}/
                         '''
@@ -126,7 +139,6 @@ EOF
     post {
         always {
             echo 'Pipeline execution completed'
-            cleanWs()
         }
         success {
             echo 'Pipeline succeeded'
