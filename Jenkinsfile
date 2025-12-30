@@ -32,9 +32,9 @@ pipeline {
             steps {
                 dir('source/' + env.APP_DIR) {
                     sh '''
-                        python3 --version
+                        python3 --version || echo "Python3 not found"
                         python3 -m venv venv
-                        source venv/bin/activate
+                        . venv/bin/activate
                         pip install --upgrade pip
                     '''
                 }
@@ -45,7 +45,7 @@ pipeline {
             steps {
                 dir('source/' + env.APP_DIR) {
                     sh '''
-                        source venv/bin/activate
+                        . venv/bin/activate
                         if [ -f "requirements.txt" ]; then
                             pip install -r requirements.txt
                         else
@@ -63,7 +63,7 @@ pipeline {
             steps {
                 dir('source/' + env.APP_DIR) {
                     sh '''
-                        source venv/bin/activate
+                        . venv/bin/activate
                         mkdir -p tests
                         if [ ! -f "tests/test_app.py" ]; then
                             cat > tests/test_app.py << EOF
@@ -107,7 +107,7 @@ EOF
                     dir('source/' + env.APP_DIR) {
                         sh '''
                             echo "Simulating deployment to ${DEPLOY_DIR}"
-                            sudo mkdir -p ${DEPLOY_DIR} || mkdir -p ${DEPLOY_DIR}
+                            mkdir -p ${DEPLOY_DIR}
                             tar -xzf flask-app-build.tar.gz -C /tmp/
                             cp -r /tmp/build/* ${DEPLOY_DIR}/ || echo "Copy simulation"
                             echo "Deployment Time: $(date)" > ${DEPLOY_DIR}/deployment.log
