@@ -9,7 +9,7 @@ pipeline {
     environment {
         REPO_URL = 'https://github.com/en1gm4-exe/Secure-Software-Design-Final.git'
         APP_DIR = 'Lab06'
-        DEPLOY_DIR = '/opt/flask-app'
+        DEPLOY_DIR = "${WORKSPACE}/deploy"
         VERSION = '1.0.0'
     }
     
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 dir('source/' + env.APP_DIR) {
                     sh '''
-                        python3 --version || echo "Python3 not found"
+                        python3 --version
                         python3 -m venv venv
                         . venv/bin/activate
                         pip install --upgrade pip
@@ -107,12 +107,14 @@ EOF
                     dir('source/' + env.APP_DIR) {
                         sh '''
                             echo "Simulating deployment to ${DEPLOY_DIR}"
+                            rm -rf ${DEPLOY_DIR}
                             mkdir -p ${DEPLOY_DIR}
                             tar -xzf flask-app-build.tar.gz -C /tmp/
                             cp -r /tmp/build/* ${DEPLOY_DIR}/ || echo "Copy simulation"
                             echo "Deployment Time: $(date)" > ${DEPLOY_DIR}/deployment.log
                             echo "Build Number: ${BUILD_NUMBER}" >> ${DEPLOY_DIR}/deployment.log
                             echo "Deployment environment: ${params.DEPLOYMENT_ENV}" >> ${DEPLOY_DIR}/deployment.log
+                            echo "Deployed files:"
                             ls -la ${DEPLOY_DIR}/
                         '''
                     }
