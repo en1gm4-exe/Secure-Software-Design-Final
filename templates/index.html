@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row">
+  <div class="col-md-5">
+    <h4>Add New Record</h4>
+    <form method="POST" action="{{ url_for('index') }}">
+      <div class="mb-3">
+        <label class="form-label">First <hr> name</label>
+        <input class="form-control" name="first_name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Last name</label>
+        <input class="form-control" name="last_name">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Phone</label>
+        <input class="form-control" name="phone">
+      </div>
+      <button class="btn btn-primary" type="submit">Add</button>
+    </form>
+  </div>
+
+  <div class="col-md-7">
+    <h4>Records</h4>
+    <table class="table table-striped">
+      <thead><tr><th>#</th><th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for p in persons %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ p.first_name }}</td>
+          <td>{{ p.last_name or '-' }}</td>
+          <td>{{ p.email or '-' }}</td>
+          <td>{{ p.phone or '-' }}</td>
+          <td>
+            <a href="{{ url_for('update', id=p.id) }}" class="btn btn-sm btn-outline-secondary">Update</a>
+
+            <form method="POST" action="{{ url_for('delete', id=p.id) }}" style="display:inline">
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this record?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">No records yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
