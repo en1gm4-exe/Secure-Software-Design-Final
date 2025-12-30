@@ -112,23 +112,31 @@ EOF
                             echo "Files in current directory:"
                             ls -la
                             
-                            echo "Simulating deployment to ${DEPLOY_DIR}"
-                            rm -rf ${DEPLOY_DIR}
-                            mkdir -p ${DEPLOY_DIR}
+                            echo "Simulating deployment to deploy directory"
+                            rm -rf deploy
+                            mkdir -p deploy
                             
                             echo "Extracting build files..."
-                            tar -xzf flask-app-build.tar.gz -C ${DEPLOY_DIR}
+                            tar -xzf flask-app-build.tar.gz -C deploy
                             
-                            echo "Copying files..."
-                            cp -r ${DEPLOY_DIR}/build/* ${DEPLOY_DIR}/ || echo "Copy simulation"
+                            echo "Checking extracted files..."
+                            ls -la deploy/
+                            
+                            if [ -d "deploy/build" ]; then
+                                echo "Copying files from deploy/build to deploy/"
+                                cp -r deploy/build/* deploy/ 2>/dev/null || echo "Copy completed"
+                            else
+                                echo "No build directory found in deploy/"
+                                echo "Listing deploy directory contents:"
+                                ls -la deploy/
+                            fi
                             
                             echo "Creating deployment log..."
-                            date > ${DEPLOY_DIR}/deployment.log
-                            echo "Build Number: ${BUILD_NUMBER}" >> ${DEPLOY_DIR}/deployment.log
-                            echo "Deployment environment: ${params.DEPLOYMENT_ENV}" >> ${DEPLOY_DIR}/deployment.log
+                            date > deploy/deployment.log
+                            echo "Deployment environment: ${DEPLOYMENT_ENV}" >> deploy/deployment.log
                             
-                            echo "Deployed files:"
-                            ls -la ${DEPLOY_DIR}/
+                            echo "Final deployed files:"
+                            ls -la deploy/
                         '''
                     }
                 }
